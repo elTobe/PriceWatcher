@@ -1,0 +1,1 @@
+\\192.168.0.105\sistema_super_vazq\historial_precios_estantes\database_snapshot.txt
