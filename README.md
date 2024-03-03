@@ -1,6 +1,6 @@
 # PriceWatcher
 
-![PriceWatcher](doc/img/screenshot1.png)
+![PriceWatcher](doc/img/screenshot1.PNG)
 
 PriceWatcher es una aplicación desarrollada en Qt 5.15.2 que te permite monitorear cambios en el precio de productos para negocios que utilizan SICAR Punto de Venta. La aplicación muestra qué productos han subido de precio, cuáles han bajado y cuáles son nuevos en comparación con una snapshot previamente guardada de la base de datos.
 
