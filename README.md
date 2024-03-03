@@ -28,11 +28,13 @@ Una vez instalado y configurado, ejecuta `PreciosEstantes.exe` para abrir la apl
 - Guardar una snapshot de precios de la base de datos.
 - Comparar los cambios en los precios desde la snapshot guardada.
 - Imprimir los indicadores de precio de los productos, ya sea uno por uno o en bulk, en una impresora térmica de 80 mm.
+- 
+## Contribuciones y Uso del Codigo
 
-## Contribuciones
+Este proyecto se ofrece como un recurso abierto para la comunidad, destinado a servir como ejemplo de integración con SICAR Punto de Venta. Si bien puedes utilizar este código como base para adaptarlo a tus propias necesidades comerciales y realizar modificaciones para tu negocio, te animamos a hacerlo de manera responsable.
 
-Las contribuciones son bienvenidas. Si deseas mejorar o agregar características a PriceWatcher, siéntete libre de hacer un fork del repositorio y enviar un pull request con tus cambios.
+Valoramos y apoyamos la creatividad y la innovación en la adaptación de este código a diferentes contextos empresariales. Si decides hacer ajustes o mejoras, te sugerimos hacer un fork del repositorio y trabajar en tu propia versión del código.
 
 ## Licencia
 
-Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para obtener más detalles.
+Este proyecto está bajo la Licencia MIT.
