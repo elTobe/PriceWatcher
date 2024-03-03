@@ -28,7 +28,7 @@ Una vez instalado y configurado, ejecuta `PreciosEstantes.exe` para abrir la apl
 - Guardar una snapshot de precios de la base de datos.
 - Comparar los cambios en los precios desde la snapshot guardada.
 - Imprimir los indicadores de precio de los productos, ya sea uno por uno o en bulk, en una impresora térmica de 80 mm.
-- 
+  
 ## Contribuciones y Uso del Codigo
 
 Este proyecto se ofrece como un recurso abierto para la comunidad, destinado a servir como ejemplo de integración con SICAR Punto de Venta. Si bien puedes utilizar este código como base para adaptarlo a tus propias necesidades comerciales y realizar modificaciones para tu negocio, te animamos a hacerlo de manera responsable.
