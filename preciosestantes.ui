@@ -150,8 +150,39 @@
          </item>
          <item>
           <widget class="QPushButton" name="editar_nombre">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Editar Nombre ..</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <widget class="QCheckBox" name="segundo_precio">
+           <property name="text">
+            <string>Segundo Precio</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="tercer_precio">
+           <property name="text">
+            <string>Tercer Precio</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="cuarto_precio">
+           <property name="text">
+            <string>Cuarto Precio</string>
            </property>
           </widget>
          </item>

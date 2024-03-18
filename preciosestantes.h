@@ -28,7 +28,7 @@ private slots:
 
     void on_guardar_db_clicked();
 
-    void set_previa(QString desc, float precio);
+    void set_previa(QString desc, float precio, float precio2 = 0.0, float cantidad2 = 0.0, float precio3 = 0.0, float cantidad3 = 0.0, float precio4 = 0.0, float cantidad4 = 0.0);
 
     bool conectar_db(QSqlDatabase* db);
 
@@ -62,12 +62,21 @@ private slots:
 
     void on_editar_precio_clicked();
 
+    void escribir_etiqueta(QPainter *documento, QString descripcion, float precio, float precio2, float cantidad2, float precio3, float cantidad3, float precio4, float cantidad4);
+
+    void on_segundo_precio_stateChanged(int arg1);
+
+    void on_tercer_precio_stateChanged(int arg1);
+
+    void on_cuarto_precio_stateChanged(int arg1);
+
 private:
 
     Ui::PreciosEstantes *ui;
 
     QFont fuente_des = QFont("Sans Serif",16,QFont::Normal,false);
     QFont fuente_precio = QFont("Eras Bold ITC",40,QFont::Normal,false);
+    QFont fuente_precios_alt = QFont("Sans Serif",11,QFont::Normal,false);
 
     QPrinterInfo impresora_info = QPrinterInfo::defaultPrinter();
 
@@ -76,5 +85,11 @@ private:
 
     QString currentDesc = "";
     float currentPrice = 0.0;
+    float currentPrice2 = 0.0;
+    float currentPrice3 = 0.0;
+    float currentPrice4 = 0.0;
+    float currentCant2 = 0.0;
+    float currentCant3 = 0.0;
+    float currentCant4 = 0.0;
 };
 #endif // PRECIOSESTANTES_H

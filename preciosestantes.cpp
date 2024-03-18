@@ -85,40 +85,117 @@ void PreciosEstantes::on_input_returnPressed()
     }
 
     QSqlQuery consulta;
-    consulta.exec("SELECT descripcion FROM articulo WHERE clave='" + ui->input->text().toUpper() + "'");
+    consulta.exec("SELECT descripcion, precio1, precio2, mayoreo2, precio3, mayoreo3, precio4, mayoreo4 FROM articulo WHERE clave='" + ui->input->text().toUpper() + "' AND status!=-1");
     if(consulta.next()) {
-        QString resultado = consulta.value(0).toString();
-        consulta.exec("SELECT precio1 FROM articulo WHERE clave='" + ui->input->text().toUpper() + "'");
-        consulta.next();
-        set_previa(resultado.toUpper(), consulta.value(0).toFloat());
+        set_previa(consulta.value("descripcion").toString().toUpper(),
+                   consulta.value("precio1").toFloat(),
+                   consulta.value("precio2").toFloat(),
+                   consulta.value("mayoreo2").toFloat(),
+                   consulta.value("precio3").toFloat(),
+                   consulta.value("mayoreo3").toFloat(),
+                   consulta.value("precio4").toFloat(),
+                   consulta.value("mayoreo4").toFloat() );
     }else{
         set_previa("NO ENCONTRADO",0.0);
     }
 }
 
-void PreciosEstantes::set_previa(QString descripcion, float precio){
+void PreciosEstantes::set_previa(QString descripcion, float precio, float precio2, float cantidad2, float precio3, float cantidad3, float precio4, float cantidad4){
 
     descripcion = descripcion.toUpper();
     currentDesc = descripcion;
     currentPrice = precio;
+    currentPrice2 = precio2;
+    currentPrice3 = precio3;
+    currentPrice4 = precio4;
+    currentCant2 = cantidad2;
+    currentCant3 = cantidad3;
+    currentCant4 = cantidad4;
 
     QPixmap imagen(ancho, alto);
     QPainter documento;
     documento.begin(&imagen);
     documento.fillRect( QRect(0,0,ancho,alto), QColor(255,255,255) );
 
-    QString num;
-    documento.setFont(fuente_des);
-    documento.drawText( QRect(0,11,ancho,alto/2 - 11), Qt::TextWordWrap | Qt::AlignHCenter , descripcion);
-    documento.setFont(fuente_precio);
-    documento.drawText( QRect(0,alto/2,ancho,alto/2), Qt::AlignVCenter | Qt::AlignHCenter ,"$ " + num.setNum(precio,'f',2) );
+    escribir_etiqueta(&documento, descripcion, precio, precio2, cantidad2, precio3, cantidad3, precio4, cantidad4);
 
     ui->previa->setPixmap(imagen);
+
+}
+
+void PreciosEstantes::escribir_etiqueta(QPainter *documento, QString descripcion, float precio, float precio2, float cantidad2, float precio3, float cantidad3, float precio4, float cantidad4){
+    QString num, num2;
+    int checked_counter = 0;
+    QString texto_precios = "";
+
+    if(ui->segundo_precio->isChecked()){
+        texto_precios = texto_precios + num.setNum(cantidad2,'g',3) + " pz: " + "$" + num2.setNum(precio2,'f',2) + "\n";
+        checked_counter++;
+    }
+    if(ui->tercer_precio->isChecked()){
+        texto_precios = texto_precios + num.setNum(cantidad3,'g',3) + " pz: " + "$" + num2.setNum(precio3,'f',2) + "\n";
+        checked_counter++;
+    }
+    if(ui->cuarto_precio->isChecked()){
+        texto_precios = texto_precios + num.setNum(cantidad4,'g',4) + " pz: " + "$" + num2.setNum(precio4,'f',2) + "\n";
+        checked_counter++;
+    }
+
+    documento->setFont(fuente_des);
+    documento->drawText( QRect(0,11,ancho,alto/2 - 11), Qt::TextWordWrap | Qt::AlignHCenter , descripcion);
+
+    if(checked_counter == 3){
+
+        int precios_ancho = 100;
+        int disminucion_fuente = 12;
+
+        fuente_precio.setPointSize(fuente_precio.pointSize() - disminucion_fuente);
+        documento->setFont(fuente_precio);
+        documento->drawText( QRect(0,alto/2,ancho - precios_ancho,alto/2), Qt::AlignVCenter | Qt::AlignHCenter ,"$ " + num.setNum(precio,'f',2) );
+        fuente_precio.setPointSize(fuente_precio.pointSize() + disminucion_fuente);
+
+        fuente_precios_alt.setPointSize(9);
+        documento->setFont(fuente_precios_alt);
+        documento->drawText( QRect(ancho-precios_ancho,alto/2 + 10,precios_ancho-5,alto/2), Qt::AlignVCenter | Qt::AlignHCenter , texto_precios);
+        fuente_precios_alt.setPointSize(11);
+
+    }else if(checked_counter == 2){
+
+        int precios_ancho = 105;
+        int disminucion_fuente = 13;
+
+        fuente_precio.setPointSize(fuente_precio.pointSize() - disminucion_fuente);
+        documento->setFont(fuente_precio);
+        documento->drawText( QRect(0,alto/2,ancho - precios_ancho,alto/2), Qt::AlignVCenter | Qt::AlignHCenter ,"$ " + num.setNum(precio,'f',2) );
+        fuente_precio.setPointSize(fuente_precio.pointSize() + disminucion_fuente);
+
+        documento->setFont(fuente_precios_alt);
+        documento->drawText( QRect(ancho-precios_ancho,alto/2 + 10,precios_ancho-5,alto/2), Qt::AlignVCenter | Qt::AlignHCenter , texto_precios);
+
+    }else if(checked_counter == 1){
+
+        texto_precios.replace(':','\n');
+        int precios_ancho = 70;
+        int disminucion_fuente = 8;
+
+        fuente_precio.setPointSize(fuente_precio.pointSize() - disminucion_fuente);
+        documento->setFont(fuente_precio);
+        documento->drawText( QRect(0,alto/2,ancho - precios_ancho,alto/2), Qt::AlignVCenter | Qt::AlignHCenter ,"$ " + num.setNum(precio,'f',2) );
+        fuente_precio.setPointSize(fuente_precio.pointSize() + disminucion_fuente);
+
+        documento->setFont(fuente_precios_alt);
+        documento->drawText( QRect(ancho-precios_ancho,alto/2 + 10,precios_ancho-5,alto/2), Qt::AlignVCenter | Qt::AlignHCenter , texto_precios);
+
+    }else{
+
+        documento->setFont(fuente_precio);
+        documento->drawText( QRect(0,alto/2,ancho,alto/2), Qt::AlignVCenter | Qt::AlignHCenter ,"$ " + num.setNum(precio,'f',2) );
+
+    }
 }
 
 void PreciosEstantes::on_imprimir_previa_clicked()
 {
-
     QPainter documento;
     QPrinter p = QPrinter(impresora_info,QPrinter::ScreenResolution);
     documento.begin(&p);
@@ -126,11 +203,7 @@ void PreciosEstantes::on_imprimir_previa_clicked()
     documento.drawLine(0,1,ancho,1);
     documento.drawLine(0,2,ancho,2);
 
-    QString num;
-    documento.setFont(fuente_des);
-    documento.drawText( QRect(0,11,ancho,alto/2 - 11), Qt::TextWordWrap | Qt::AlignHCenter , currentDesc);
-    documento.setFont(fuente_precio);
-    documento.drawText( QRect(0,alto/2,ancho,alto/2), Qt::AlignVCenter | Qt::AlignHCenter ,"$ " + num.setNum(currentPrice,'f',2) );
+    escribir_etiqueta(&documento, currentDesc, currentPrice, currentPrice2, currentCant2, currentPrice3, currentCant3, currentPrice4, currentCant4);
 
     documento.end();
     ui->input->selectAll();
@@ -212,7 +285,7 @@ void PreciosEstantes::on_lista_cambios_itemClicked(QTreeWidgetItem *item, int co
         on_input_returnPressed();
     }else{
         ui->input->setText(item->text(1));
-        set_previa("DESCRIPCION",0.0);
+        set_previa("DESCRIPCION", 0.0);
     }
 }
 
@@ -405,17 +478,31 @@ void PreciosEstantes::on_editar_nombre_clicked()
     bool ok;
     QString text = QInputDialog::getText(this, "Editar Nombre ... ", "Escriba la descripcion", QLineEdit::Normal, currentDesc, &ok);
     if ( ok ){
-        set_previa( text.toUpper(), currentPrice );
+        set_previa( text.toUpper(), currentPrice, currentPrice2, currentCant2, currentPrice3, currentCant3, currentPrice4, currentCant4);
     }
 }
-
 
 void PreciosEstantes::on_editar_precio_clicked()
 {
     bool ok;
     float p = QInputDialog::getDouble(this,"Editar Precio ... ", "Escriba el precio (2 decimales)", currentPrice, 0.00, 100000.00, 2, &ok, Qt::WindowFlags(),0.50 );
     if( ok ){
-        set_previa( currentDesc, p);
+        set_previa( currentDesc, p , currentPrice2, currentCant2, currentPrice3, currentCant3, currentPrice4, currentCant4);
     }
+}
+
+void PreciosEstantes::on_segundo_precio_stateChanged(int arg1)
+{
+    set_previa( currentDesc, currentPrice , currentPrice2, currentCant2, currentPrice3, currentCant3, currentPrice4, currentCant4);
+}
+
+void PreciosEstantes::on_tercer_precio_stateChanged(int arg1)
+{
+    set_previa( currentDesc, currentPrice , currentPrice2, currentCant2, currentPrice3, currentCant3, currentPrice4, currentCant4);
+}
+
+void PreciosEstantes::on_cuarto_precio_stateChanged(int arg1)
+{
+    set_previa( currentDesc, currentPrice , currentPrice2, currentCant2, currentPrice3, currentCant3, currentPrice4, currentCant4);
 }
 
