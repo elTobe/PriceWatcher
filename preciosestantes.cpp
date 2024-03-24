@@ -2,6 +2,7 @@
 #include "ui_preciosestantes.h"
 #include <QMessageBox>
 #include <QSqlDatabase>
+#include <QtSql>
 #include <QFile>
 #include <QSqlQuery>
 #include <QtPrintSupport>
@@ -85,15 +86,23 @@ void PreciosEstantes::on_input_returnPressed()
     }
 
     QSqlQuery consulta;
-    consulta.exec("SELECT descripcion, precio1, precio2, mayoreo2, precio3, mayoreo3, precio4, mayoreo4 FROM articulo WHERE clave='" + ui->input->text().toUpper() + "' AND status!=-1");
+    consulta.exec("SELECT descripcion, precio1, precio2, mayoreo2, precio3, mayoreo3, precio4, mayoreo4, impuesto FROM articulo a LEFT JOIN articuloimpuesto ai ON a.art_id=ai.art_id LEFT JOIN impuesto i ON i.imp_id=ai.imp_id WHERE clave='" + ui->input->text().toUpper() + "' AND a.status!=-1");
+    qDebug() << consulta.lastError().text();
+
     if(consulta.next()) {
+
+        float impuesto = 1;
+        if( !consulta.value("impuesto").toString().isEmpty() ){
+            impuesto = impuesto + consulta.value("impuesto").toFloat()/100.0;
+        }
+
         set_previa(consulta.value("descripcion").toString().toUpper(),
-                   consulta.value("precio1").toFloat(),
-                   consulta.value("precio2").toFloat(),
+                   consulta.value("precio1").toFloat() * impuesto,
+                   consulta.value("precio2").toFloat() * impuesto,
                    consulta.value("mayoreo2").toFloat(),
-                   consulta.value("precio3").toFloat(),
+                   consulta.value("precio3").toFloat() * impuesto,
                    consulta.value("mayoreo3").toFloat(),
-                   consulta.value("precio4").toFloat(),
+                   consulta.value("precio4").toFloat() * impuesto,
                    consulta.value("mayoreo4").toFloat() );
     }else{
         set_previa("NO ENCONTRADO",0.0);
@@ -233,11 +242,18 @@ void PreciosEstantes::on_guardar_db_clicked()
     QTextStream out(&file);
 
     QSqlQuery consulta;
-    consulta.exec("SELECT clave,precio1 FROM articulo");
+    consulta.exec("SELECT clave,precio1,impuesto FROM articulo a LEFT JOIN articuloimpuesto ai ON a.art_id=ai.art_id LEFT JOIN impuesto i ON i.imp_id=ai.imp_id WHERE a.status!=-1");
 
     while( consulta.next() ){
-        QString id = consulta.value(0).toString();
-        QString precio1 = consulta.value(1).toString();
+        float impuesto = 1;
+        if( !consulta.value("impuesto").toString().isEmpty() ){
+            impuesto = impuesto + consulta.value("impuesto").toFloat()/100.0;
+        }
+
+        QString id = consulta.value("clave").toString();
+        float precio1_float = consulta.value("precio1").toFloat() * impuesto;
+        QString precio1;
+        precio1 = precio1.setNum(precio1_float,'g',10);
         out << id << "," << precio1 << "\n";
     }
     file.close();
@@ -373,7 +389,7 @@ void PreciosEstantes::consultar(int modo){
     on_borrar_lista_clicked();
 
     QSqlQuery consulta;
-    consulta.exec("SELECT clave,descripcion,precio1 FROM articulo WHERE status=1");
+    consulta.exec("SELECT clave,descripcion,precio1,impuesto FROM articulo a LEFT JOIN articuloimpuesto ai ON a.art_id=ai.art_id LEFT JOIN impuesto i ON i.imp_id=ai.imp_id WHERE a.status!=-1");
 
     QString ruta = leer_ruta_db();
 
@@ -389,11 +405,18 @@ void PreciosEstantes::consultar(int modo){
         int i = 0;
         int total = consulta.size();
         while( consulta.next() && (modo==1 || modo==3) ){
+
+            float impuesto = 1;
+            if( !consulta.value("impuesto").toString().isEmpty() ){ impuesto = impuesto + consulta.value("impuesto").toFloat()/100.0; }
+            float precio1_float = consulta.value("precio1").toFloat() * impuesto;
+            QString precio1;
+            precio1 = precio1.setNum(precio1_float,'g',10);
+
             QStringList art;
-            art << consulta.value(0).toString();
-            art << consulta.value(1).toString();
+            art << consulta.value("clave").toString();
+            art << consulta.value("descripcion").toString();
             art << "N/A";
-            art << consulta.value(2).toString();
+            art << precio1;
             add_child(art,1);
             ui->progreso_barra->setValue(i*90/total + 10);
             i++;
@@ -421,9 +444,14 @@ void PreciosEstantes::consultar(int modo){
 
     while(consulta.next()){
 
+        float impuesto = 1;
+        if( !consulta.value("impuesto").toString().isEmpty() ){ impuesto = impuesto + consulta.value("impuesto").toFloat()/100.0; }
+        float precio1_float = consulta.value("precio1").toFloat() * impuesto;
+        QString precio_art;
+        precio_art = precio_art.setNum(precio1_float,'g',10);
+
         QString clave_art = consulta.value(0).toString();
         QString descripcion_art = consulta.value(1).toString();
-        QString precio_art = consulta.value(2).toString();
         QString precio_snapshot;
         int index = claves.indexOf(clave_art);
 
