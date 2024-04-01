@@ -18,7 +18,6 @@ PreciosEstantes::PreciosEstantes(QWidget *parent)
     ui->setupUi(this);
 
     fuente_des.setCapitalization(QFont::AllUppercase);
-    fuente_precio.setBold(true);
 
     ui->combo_impresoras->addItems(QPrinterInfo::availablePrinterNames());
     ui->combo_impresoras->setCurrentText(QPrinterInfo::defaultPrinterName());
@@ -86,7 +85,7 @@ void PreciosEstantes::on_input_returnPressed()
     }
 
     QSqlQuery consulta;
-    consulta.exec("SELECT descripcion, precio1, precio2, mayoreo2, precio3, mayoreo3, precio4, mayoreo4, impuesto FROM articulo a LEFT JOIN articuloimpuesto ai ON a.art_id=ai.art_id LEFT JOIN impuesto i ON i.imp_id=ai.imp_id WHERE clave='" + ui->input->text().toUpper() + "' AND a.status!=-1");
+    consulta.exec("SELECT descripcion, precio1, precio2, mayoreo2, precio3, mayoreo3, precio4, mayoreo4, impuesto FROM articulo a LEFT JOIN articuloimpuesto ai ON a.art_id=ai.art_id LEFT JOIN impuesto i ON i.imp_id=ai.imp_id WHERE clave='" + ui->input->text().toUpper() + "' OR claveAlterna='" + ui->input->text().toUpper() + "' AND a.status!=-1");
     qDebug() << consulta.lastError().text();
 
     if(consulta.next()) {
@@ -133,74 +132,81 @@ void PreciosEstantes::set_previa(QString descripcion, float precio, float precio
 }
 
 void PreciosEstantes::escribir_etiqueta(QPainter *documento, QString descripcion, float precio, float precio2, float cantidad2, float precio3, float cantidad3, float precio4, float cantidad4){
+
     QString num, num2;
     int checked_counter = 0;
     QString texto_precios = "";
 
     if(ui->segundo_precio->isChecked()){
-        texto_precios = texto_precios + num.setNum(cantidad2,'g',3) + " pz: " + "$" + num2.setNum(precio2,'f',2) + "\n";
+        texto_precios = texto_precios + num.setNum(cantidad2,'g',3) + "pz " + "$" + num2.setNum(precio2,'f',2) + " @\n";
         checked_counter++;
     }
     if(ui->tercer_precio->isChecked()){
-        texto_precios = texto_precios + num.setNum(cantidad3,'g',3) + " pz: " + "$" + num2.setNum(precio3,'f',2) + "\n";
+        texto_precios = texto_precios + num.setNum(cantidad3,'g',3) + "pz " + "$" + num2.setNum(precio3,'f',2) + " @\n";
         checked_counter++;
     }
     if(ui->cuarto_precio->isChecked()){
-        texto_precios = texto_precios + num.setNum(cantidad4,'g',4) + " pz: " + "$" + num2.setNum(precio4,'f',2) + "\n";
+        texto_precios = texto_precios + num.setNum(cantidad4,'g',4) + "pz " + "$" + num2.setNum(precio4,'f',2) + " @\n";
         checked_counter++;
     }
 
     documento->setFont(fuente_des);
-    documento->drawText( QRect(0,11,ancho,alto/2 - 11), Qt::TextWordWrap | Qt::AlignHCenter , descripcion);
+    documento->drawText( QRect(0, 5, ancho , 50), Qt::TextWordWrap | Qt::AlignHCenter | Qt::AlignVCenter , descripcion);
+
+    QRect rect_precio_menudeo;
+    QRect rect_precio_mayoreo;
+
+    // ancho = 272; alto = 125;
 
     if(checked_counter == 3){
 
-        int precios_ancho = 100;
-        int disminucion_fuente = 12;
-
-        fuente_precio.setPointSize(fuente_precio.pointSize() - disminucion_fuente);
-        documento->setFont(fuente_precio);
-        documento->drawText( QRect(0,alto/2,ancho - precios_ancho,alto/2), Qt::AlignVCenter | Qt::AlignHCenter ,"$ " + num.setNum(precio,'f',2) );
-        fuente_precio.setPointSize(fuente_precio.pointSize() + disminucion_fuente);
-
+        fuente_precio.setStretch(QFont::Condensed);
+        texto_precios = "A partir de: \n" + texto_precios;
+        fuente_precio.setPointSize(30);
         fuente_precios_alt.setPointSize(9);
-        documento->setFont(fuente_precios_alt);
-        documento->drawText( QRect(ancho-precios_ancho,alto/2 + 10,precios_ancho-5,alto/2), Qt::AlignVCenter | Qt::AlignHCenter , texto_precios);
-        fuente_precios_alt.setPointSize(11);
+        int ancho_precio_main = 155;
+        rect_precio_menudeo = QRect(0, 60, ancho_precio_main, 60);
+        rect_precio_mayoreo = QRect(ancho_precio_main, 60, ancho-ancho_precio_main, 55);
 
     }else if(checked_counter == 2){
 
-        int precios_ancho = 105;
-        int disminucion_fuente = 13;
-
-        fuente_precio.setPointSize(fuente_precio.pointSize() - disminucion_fuente);
-        documento->setFont(fuente_precio);
-        documento->drawText( QRect(0,alto/2,ancho - precios_ancho,alto/2), Qt::AlignVCenter | Qt::AlignHCenter ,"$ " + num.setNum(precio,'f',2) );
-        fuente_precio.setPointSize(fuente_precio.pointSize() + disminucion_fuente);
-
-        documento->setFont(fuente_precios_alt);
-        documento->drawText( QRect(ancho-precios_ancho,alto/2 + 10,precios_ancho-5,alto/2), Qt::AlignVCenter | Qt::AlignHCenter , texto_precios);
+        fuente_precio.setStretch(QFont::Condensed);
+        texto_precios = "A partir de: \n" + texto_precios;
+        fuente_precio.setPointSize(32);
+        fuente_precios_alt.setPointSize(10);
+        int ancho_precio_main = 160;
+        rect_precio_menudeo = QRect(0, 60, ancho_precio_main, 60);
+        rect_precio_mayoreo = QRect(ancho_precio_main, 70, ancho-ancho_precio_main, 55);
 
     }else if(checked_counter == 1){
 
-        texto_precios.replace(':','\n');
-        int precios_ancho = 70;
-        int disminucion_fuente = 8;
-
-        fuente_precio.setPointSize(fuente_precio.pointSize() - disminucion_fuente);
-        documento->setFont(fuente_precio);
-        documento->drawText( QRect(0,alto/2,ancho - precios_ancho,alto/2), Qt::AlignVCenter | Qt::AlignHCenter ,"$ " + num.setNum(precio,'f',2) );
-        fuente_precio.setPointSize(fuente_precio.pointSize() + disminucion_fuente);
-
-        documento->setFont(fuente_precios_alt);
-        documento->drawText( QRect(ancho-precios_ancho,alto/2 + 10,precios_ancho-5,alto/2), Qt::AlignVCenter | Qt::AlignHCenter , texto_precios);
+        fuente_precio.setStretch(82);
+        texto_precios.replace("pz "," o más: \n");
+        fuente_precio.setPointSize(35);
+        fuente_precios_alt.setPointSize(11);
+        int ancho_precio_main = 185;
+        rect_precio_menudeo = QRect(0, 60, ancho_precio_main, 60);
+        rect_precio_mayoreo = QRect(ancho_precio_main, 70, ancho-ancho_precio_main, 55);
 
     }else{
 
-        documento->setFont(fuente_precio);
-        documento->drawText( QRect(0,alto/2,ancho,alto/2), Qt::AlignVCenter | Qt::AlignHCenter ,"$ " + num.setNum(precio,'f',2) );
+        texto_precios = "";
+        fuente_precio.setPointSize(40);
+        fuente_precios_alt.setPointSize(5);
+        rect_precio_menudeo = QRect(0,65,ancho,60);
+        rect_precio_mayoreo = QRect(0, 0, 0, 0);
 
     }
+
+    documento->setFont(fuente_precio);
+    documento->drawText( rect_precio_menudeo, Qt::AlignVCenter | Qt::AlignHCenter ,"$ " + num.setNum(precio,'f',2) );
+    fuente_precio.setStretch(QFont::Unstretched);
+    fuente_precio.setPointSize(35);
+
+    documento->setFont(fuente_precios_alt);
+    documento->drawText( rect_precio_mayoreo, Qt::AlignVCenter | Qt::AlignHCenter , texto_precios);
+    fuente_precios_alt.setPointSize(11);
+
 }
 
 void PreciosEstantes::on_imprimir_previa_clicked()

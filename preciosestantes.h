@@ -7,6 +7,7 @@
 #include <QPrinterInfo>
 #include <QFontMetrics>
 #include <QTreeWidgetItem>
+#include <QFontDatabase>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class PreciosEstantes; }
@@ -74,9 +75,10 @@ private:
 
     Ui::PreciosEstantes *ui;
 
-    QFont fuente_des = QFont("Sans Serif",16,QFont::Normal,false);
-    QFont fuente_precio = QFont("Eras Bold ITC",40,QFont::Normal,false);
-    QFont fuente_precios_alt = QFont("Sans Serif",11,QFont::Normal,false);
+    QFont fuente_des = QFont("Sans Serif",15,QFont::Normal,false);
+    QFont fuente_precio = QFont("Eras Bold ITC",40,QFont::Bold,false);
+    int id = QFontDatabase::addApplicationFont(":/fonts/LucidaTypeMod.ttf");
+    QFont fuente_precios_alt = QFont("LucidaTypeMod",11,QFont::Normal,false);
 
     QPrinterInfo impresora_info = QPrinterInfo::defaultPrinter();
 
